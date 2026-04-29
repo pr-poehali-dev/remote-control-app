@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import ConnectionsSection from "@/components/ConnectionsSection";
+import MessengerSection from "@/components/MessengerSection";
 
 // --- Types ---
-type Section = "dashboard" | "sessions" | "security" | "logs" | "users" | "analytics" | "settings";
+type Section = "dashboard" | "connections" | "messenger" | "sessions" | "security" | "logs" | "users" | "analytics" | "settings";
 
 // --- Mock Data ---
 const activeSessions = [
@@ -506,18 +508,22 @@ const Settings = () => (
 );
 
 // --- Navigation ---
-const navItems: { id: Section; label: string; icon: string }[] = [
-  { id: "dashboard", label: "Дашборд", icon: "LayoutDashboard" },
-  { id: "sessions", label: "Сеансы", icon: "Monitor" },
-  { id: "security", label: "Безопасность", icon: "Shield" },
-  { id: "logs", label: "Логи", icon: "ScrollText" },
-  { id: "users", label: "Пользователи", icon: "Users" },
-  { id: "analytics", label: "Аналитика", icon: "BarChart2" },
-  { id: "settings", label: "Настройки", icon: "Settings" },
+const navItems: { id: Section; label: string; icon: string; badge?: string; group?: string }[] = [
+  { id: "dashboard", label: "Дашборд", icon: "LayoutDashboard", group: "Основное" },
+  { id: "connections", label: "Подключения", icon: "PlugZap", badge: "100", group: "Основное" },
+  { id: "messenger", label: "Мессенджер", icon: "MessageSquare", badge: "5", group: "Основное" },
+  { id: "sessions", label: "Сеансы", icon: "Monitor", badge: "3", group: "Мониторинг" },
+  { id: "logs", label: "Логи", icon: "ScrollText", group: "Мониторинг" },
+  { id: "analytics", label: "Аналитика", icon: "BarChart2", group: "Мониторинг" },
+  { id: "security", label: "Безопасность", icon: "Shield", group: "Управление" },
+  { id: "users", label: "Пользователи", icon: "Users", group: "Управление" },
+  { id: "settings", label: "Настройки", icon: "Settings", group: "Управление" },
 ];
 
 const sectionTitles: Record<Section, string> = {
   dashboard: "Панель управления",
+  connections: "Объекты подключения",
+  messenger: "Мессенджер",
   sessions: "Управление сеансами",
   security: "Безопасность и конфигурация",
   logs: "Журнал событий",
@@ -534,6 +540,8 @@ export default function Index() {
   const renderSection = () => {
     switch (section) {
       case "dashboard": return <Dashboard />;
+      case "connections": return <ConnectionsSection />;
+      case "messenger": return <MessengerSection />;
       case "sessions": return <Sessions />;
       case "security": return <Security />;
       case "logs": return <Logs />;
@@ -579,19 +587,24 @@ export default function Index() {
           <div className="text-xs text-white/25 font-mono-custom mt-0.5">Uptime: 14д 6ч 22м</div>
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5 mt-2">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { setSection(item.id); setSidebarOpen(false); }}
-              className={`nav-item w-full ${section === item.id ? "active" : ""}`}
-            >
-              <Icon name={item.icon} size={17} />
-              {item.label}
-              {item.id === "sessions" && (
-                <span className="ml-auto text-xs bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-full font-mono-custom">3</span>
-              )}
-            </button>
+        <nav className="flex-1 p-3 mt-2 overflow-y-auto space-y-4">
+          {["Основное", "Мониторинг", "Управление"].map(group => (
+            <div key={group}>
+              <div className="text-xs text-white/20 font-mono-custom px-2 mb-1">{group}</div>
+              {navItems.filter(i => i.group === group).map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => { setSection(item.id); setSidebarOpen(false); }}
+                  className={`nav-item w-full ${section === item.id ? "active" : ""}`}
+                >
+                  <Icon name={item.icon} size={17} />
+                  {item.label}
+                  {item.badge && (
+                    <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full font-mono-custom ${section === item.id ? "bg-cyan-500/30 text-cyan-300" : "bg-white/8 text-white/35"}`}>{item.badge}</span>
+                  )}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
